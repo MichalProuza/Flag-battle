@@ -245,9 +245,8 @@
     }
     
     .player-card.active {
-      background: var(--bg-card);
-      box-shadow: 0 0 30px rgba(255,255,255,.3);
-      transform: scale(1.05);
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 0 20px rgba(255,255,255,.15);
     }
     
     .player-card .name {
@@ -618,11 +617,10 @@
         p.correctAnswers = 0;
       });
       
-      this.currentPlayerIndex = 0;
+      this.currentPlayerIndex = -1; // Start at -1 so first nextTurn() moves to 0
       this.gameState = 'playing';
       
       this.showScreen('gameScreen');
-      this.renderScoreboard();
       this.nextTurn();
     },
     
