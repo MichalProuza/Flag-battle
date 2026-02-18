@@ -1,0 +1,892 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Souboj vlajek</title>
+  <style>
+    :root { 
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      --bg-dark: #0b1020;
+      --bg-card: #121a33;
+      --bg-input: #0f1730;
+      --bg-button: #1b2a57;
+      --border-subtle: rgba(255,255,255,.08);
+      --border-medium: rgba(255,255,255,.14);
+      --text-primary: #e8eefc;
+      --success: rgba(46, 204, 113, .5);
+      --success-bg: rgba(46, 204, 113, .10);
+      --error: rgba(231, 76, 60, .5);
+      --error-bg: rgba(231, 76, 60, .10);
+      --warning: rgba(241, 196, 15, .5);
+      --warning-bg: rgba(241, 196, 15, .10);
+      --player1: #3498db;
+      --player2: #e74c3c;
+      --player3: #2ecc71;
+      --player4: #f39c12;
+    }
+    
+    * { box-sizing: border-box; }
+    
+    body { 
+      margin: 0; 
+      background: var(--bg-dark); 
+      color: var(--text-primary);
+      line-height: 1.5;
+    }
+    
+    .wrap { 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 24px; 
+    }
+    
+    .card { 
+      background: var(--bg-card); 
+      border: 1px solid var(--border-subtle); 
+      border-radius: 16px; 
+      padding: 20px; 
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      margin-bottom: 20px;
+    }
+    
+    h1 { 
+      margin: 0 0 10px; 
+      font-size: 28px; 
+      font-weight: 700;
+      text-align: center;
+    }
+    
+    h2 {
+      margin: 0 0 15px;
+      font-size: 20px;
+      font-weight: 600;
+    }
+    
+    .setup-screen, .game-screen, .results-screen {
+      display: none;
+    }
+    
+    .setup-screen.active, .game-screen.active, .results-screen.active {
+      display: block;
+    }
+    
+    .player-setup {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .player-input-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .player-input-row input {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border-medium);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      font-size: 16px;
+    }
+    
+    .player-input-row input:focus {
+      outline: none;
+      border-color: rgba(255,255,255,.4);
+    }
+    
+    .player-color-badge {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.3);
+    }
+    
+    .btn-remove {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--error);
+      background: var(--error-bg);
+      color: var(--text-primary);
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    button { 
+      padding: 14px 20px; 
+      border-radius: 12px; 
+      border: 1px solid var(--border-medium); 
+      background: var(--bg-button); 
+      color: var(--text-primary); 
+      cursor: pointer; 
+      font-weight: 600;
+      font-size: 15px;
+      transition: filter 0.15s ease, transform 0.1s ease;
+    }
+    
+    button:hover:not(:disabled) { 
+      filter: brightness(1.15);
+    }
+    
+    button:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+    
+    button:disabled { 
+      opacity: .55; 
+      cursor: not-allowed; 
+    }
+    
+    button.primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      font-size: 16px;
+      padding: 16px 24px;
+    }
+    
+    button.secondary {
+      background: var(--bg-input);
+    }
+    
+    .current-turn {
+      display: none;
+    }
+    
+    .turn-info {
+      display: none;
+    }
+    
+    .timer {
+      display: none;
+    }
+    
+    .question-counter {
+      display: none;
+    }
+    
+    .row { 
+      display: flex; 
+      gap: 16px; 
+      flex-wrap: wrap; 
+      align-items: center; 
+    }
+    
+    .flagBox { 
+      flex: 1 1 360px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      padding: 24px; 
+      background: var(--bg-input); 
+      border-radius: 14px; 
+      border: 1px solid var(--border-subtle); 
+      min-height: 250px;
+    }
+    
+    img.flag { 
+      width: min(420px, 100%); 
+      height: auto; 
+      border-radius: 10px; 
+      background: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,.3);
+    }
+    
+    .choices { 
+      display: grid; 
+      grid-template-columns: 1fr; 
+      gap: 12px; 
+      margin-top: 20px; 
+    }
+    
+    @media (min-width: 700px) { 
+      .choices { 
+        grid-template-columns: 1fr 1fr; 
+      } 
+    }
+    
+    .choice { 
+      text-align: left;
+      position: relative;
+      font-size: 16px;
+      padding: 16px 20px;
+    }
+    
+    .choice.correct {
+      background: var(--success-bg);
+      border-color: var(--success);
+    }
+    
+    .choice.incorrect {
+      background: var(--error-bg);
+      border-color: var(--error);
+    }
+    
+    .scoreboard {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    
+    .player-card {
+      flex: 1;
+      min-width: 200px;
+      padding: 16px;
+      background: var(--bg-input);
+      border-radius: 12px;
+      border: 2px solid;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    
+    .player-card.active {
+      background: var(--bg-card);
+      box-shadow: 0 0 30px rgba(255,255,255,.3);
+      transform: scale(1.05);
+    }
+    
+    .player-card .name {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .player-card .score {
+      font-size: 32px;
+      font-weight: 700;
+      margin: 8px 0;
+    }
+    
+    .player-card .details {
+      font-size: 13px;
+      opacity: .8;
+    }
+    
+    .player-card .timer-display {
+      font-size: 28px;
+      font-weight: 700;
+      margin-top: 10px;
+      padding: 8px;
+      background: rgba(255,255,255,.08);
+      border-radius: 8px;
+    }
+    
+    .player-card .timer-display.warning {
+      background: var(--warning-bg);
+      border: 2px solid var(--warning);
+      animation: pulse 1s ease-in-out infinite;
+    }
+    
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    
+    .results-table th,
+    .results-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    
+    .results-table th {
+      background: var(--bg-input);
+      font-weight: 600;
+    }
+    
+    .results-table tr:first-child td {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    
+    .medal {
+      font-size: 24px;
+      margin-right: 8px;
+    }
+    
+    .center {
+      text-align: center;
+    }
+    
+    .msg { 
+      margin-top: 16px; 
+      padding: 12px 16px; 
+      border-radius: 12px; 
+      border: 1px solid var(--border-medium); 
+      background: rgba(255,255,255,.06);
+      animation: slideIn 0.2s ease;
+      text-align: center;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-5px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .msg.ok { 
+      border-color: var(--success); 
+      background: var(--success-bg); 
+    }
+    
+    .msg.bad { 
+      border-color: var(--error); 
+      background: var(--error-bg); 
+    }
+    
+    .small { 
+      opacity: .85; 
+      font-size: 13px; 
+      line-height: 1.35; 
+    }
+    
+    .loader {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,.2);
+      border-top-color: var(--text-primary);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .info-box {
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    
+    .info-box ul {
+      margin: 10px 0;
+      padding-left: 24px;
+    }
+    
+    .info-box li {
+      margin: 6px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>🏆 Souboj vlajek</h1>
+    
+    <!-- Setup Screen -->
+    <div class="setup-screen active" id="setupScreen">
+      <div class="card">
+        <h2>Nastavení hráčů</h2>
+        
+        <div class="info-box">
+          <strong>Pravidla hry:</strong>
+          <ul>
+            <li>Každý hráč odpoví na <strong>15 otázek</strong></li>
+            <li>Na každou odpověď máte <strong>30 sekund</strong></li>
+            <li>Za správnou odpověď: <strong>+1 bod</strong></li>
+            <li><strong>Hráči se střídají po každé otázce</strong></li>
+            <li>Vyhrává hráč s nejvyšším skóre!</li>
+          </ul>
+        </div>
+        
+        <div class="player-setup" id="playerSetup">
+          <!-- Player inputs will be added here -->
+        </div>
+        
+        <div class="btn-group">
+          <button class="secondary" onclick="app.addPlayer()">➕ Přidat hráče</button>
+          <button class="primary" onclick="app.startGame()">🎮 Začít hru</button>
+        </div>
+        
+        <div id="setupMessage" class="msg" style="display:none;"></div>
+      </div>
+    </div>
+    
+    <!-- Game Screen -->
+    <div class="game-screen" id="gameScreen">
+      <div class="scoreboard" id="scoreboard">
+        <!-- Player cards will be added here -->
+      </div>
+      
+      <div class="card">
+        <div class="flagBox">
+          <img id="flagImg" class="flag" alt="Vlajka" />
+        </div>
+        
+        <div class="choices" id="choices"></div>
+        
+        <div id="gameMessage" class="msg" style="display:none;"></div>
+      </div>
+    </div>
+    
+    <!-- Results Screen -->
+    <div class="results-screen" id="resultsScreen">
+      <div class="card">
+        <h2 class="center">🎉 Výsledky hry</h2>
+        
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>Pořadí</th>
+              <th>Hráč</th>
+              <th>Skóre</th>
+              <th>Úspěšnost</th>
+            </tr>
+          </thead>
+          <tbody id="resultsTableBody">
+            <!-- Results will be added here -->
+          </tbody>
+        </table>
+        
+        <div class="btn-group">
+          <button class="primary" onclick="app.newGame()">🔄 Nová hra</button>
+          <button class="secondary" onclick="app.backToSetup()">⚙️ Změnit hráče</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  'use strict';
+  
+  // ===== CONSTANTS =====
+  const API_URL = "https://restcountries.com/v3.1/all?fields=cca2,name,flags,translations";
+  const QUESTIONS_PER_PLAYER = 15;
+  const TIME_PER_QUESTION = 30;
+  const CHOICE_COUNT = 4;
+  const PLAYER_COLORS = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c'];
+  
+  const CZ_OVERRIDES = {
+    "CZ": "Česká republika", "US": "Spojené státy americké", "GB": "Spojené království",
+    "RU": "Rusko", "KR": "Jižní Korea", "KP": "Severní Korea", "AE": "Spojené arabské emiráty",
+    "IR": "Írán", "SY": "Sýrie", "CD": "Kongo (DRC)", "CG": "Kongo", "CI": "Pobřeží slonoviny",
+    "VA": "Vatikán", "TL": "Východní Timor", "MK": "Severní Makedonie"
+  };
+
+  // ===== STATE =====
+  const app = {
+    countries: [],
+    players: [],
+    currentPlayerIndex: 0,
+    currentQuestion: null,
+    timerInterval: null,
+    timeRemaining: TIME_PER_QUESTION,
+    isAnswered: false,
+    gameState: 'setup', // setup, playing, results
+    
+    // ===== INITIALIZATION =====
+    async init() {
+      try {
+        this.showMessage('setupMessage', 'Načítám seznam zemí...', null);
+        this.countries = await this.loadCountries();
+        this.showMessage('setupMessage', `✓ Načteno ${this.countries.length} zemí`, 'ok');
+        setTimeout(() => this.hideMessage('setupMessage'), 2000);
+        
+        // Add 2 default players
+        this.addPlayer('Hráč 1');
+        this.addPlayer('Hráč 2');
+        
+      } catch (err) {
+        console.error('Failed to load countries:', err);
+        this.showMessage('setupMessage', 'Nepodařilo se načíst seznam zemí. Zkontroluj připojení.', 'bad');
+      }
+    },
+    
+    // ===== API =====
+    async loadCountries() {
+      const response = await fetch(API_URL);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      
+      const data = await response.json();
+      const cleaned = data
+        .map(country => {
+          const code = country.cca2;
+          const apiName = country?.translations?.ces?.common || country?.name?.common;
+          const name = (CZ_OVERRIDES[code] || apiName || "").trim();
+          return { code, name, flagPng: country?.flags?.png || null };
+        })
+        .filter(c => c.code && c.name && c.flagPng);
+
+      const uniqueMap = new Map();
+      cleaned.forEach(c => {
+        const key = c.code.toUpperCase();
+        if (!uniqueMap.has(key)) uniqueMap.set(key, c);
+      });
+
+      return Array.from(uniqueMap.values()).sort((a, b) => 
+        a.name.localeCompare(b.name, "cs")
+      );
+    },
+    
+    // ===== PLAYER MANAGEMENT =====
+    addPlayer(defaultName = '') {
+      if (this.players.length >= 6) {
+        this.showMessage('setupMessage', 'Maximum je 6 hráčů!', 'bad');
+        return;
+      }
+      
+      const playerNum = this.players.length + 1;
+      const player = {
+        id: Date.now() + playerNum,
+        name: defaultName || `Hráč ${playerNum}`,
+        color: PLAYER_COLORS[this.players.length % PLAYER_COLORS.length],
+        score: 0,
+        questionsAnswered: 0,
+        correctAnswers: 0
+      };
+      
+      this.players.push(player);
+      this.renderPlayerSetup();
+    },
+    
+    removePlayer(playerId) {
+      this.players = this.players.filter(p => p.id !== playerId);
+      this.renderPlayerSetup();
+    },
+    
+    updatePlayerName(playerId, name) {
+      const player = this.players.find(p => p.id === playerId);
+      if (player) player.name = name.trim() || `Hráč ${this.players.indexOf(player) + 1}`;
+    },
+    
+    renderPlayerSetup() {
+      const container = document.getElementById('playerSetup');
+      container.innerHTML = this.players.map((player, index) => `
+        <div class="player-input-row">
+          <div class="player-color-badge" style="background: ${player.color};"></div>
+          <input 
+            type="text" 
+            value="${player.name}" 
+            placeholder="Jméno hráče ${index + 1}"
+            onchange="app.updatePlayerName(${player.id}, this.value)"
+          />
+          ${this.players.length > 2 ? `
+            <button class="btn-remove" onclick="app.removePlayer(${player.id})">✕</button>
+          ` : ''}
+        </div>
+      `).join('');
+    },
+    
+    // ===== GAME FLOW =====
+    startGame() {
+      if (this.players.length < 2) {
+        this.showMessage('setupMessage', 'Musíte být alespoň 2 hráči!', 'bad');
+        return;
+      }
+      
+      if (this.countries.length === 0) {
+        this.showMessage('setupMessage', 'Seznam zemí ještě není načtený!', 'bad');
+        return;
+      }
+      
+      // Validate player names
+      const hasEmptyNames = this.players.some(p => !p.name.trim());
+      if (hasEmptyNames) {
+        this.showMessage('setupMessage', 'Všichni hráči musí mít jméno!', 'bad');
+        return;
+      }
+      
+      // Reset game state
+      this.players.forEach(p => {
+        p.score = 0;
+        p.questionsAnswered = 0;
+        p.correctAnswers = 0;
+      });
+      
+      this.currentPlayerIndex = 0;
+      this.gameState = 'playing';
+      
+      this.showScreen('gameScreen');
+      this.renderScoreboard();
+      this.nextTurn();
+    },
+    
+    nextTurn() {
+      // Check if all players finished their questions
+      const allFinished = this.players.every(p => p.questionsAnswered >= QUESTIONS_PER_PLAYER);
+      if (allFinished) {
+        this.endGame();
+        return;
+      }
+      
+      // Move to next player (rotate through players)
+      this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length;
+      
+      // Skip players who already finished their questions
+      let attempts = 0;
+      while (this.players[this.currentPlayerIndex].questionsAnswered >= QUESTIONS_PER_PLAYER) {
+        this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length;
+        attempts++;
+        if (attempts > this.players.length) break; // Safety check
+      }
+      
+      this.isAnswered = false;
+      this.timeRemaining = TIME_PER_QUESTION;
+      this.hideMessage('gameMessage');
+      
+      this.renderScoreboard();
+      this.buildQuestion();
+      this.startTimer();
+    },
+    
+    renderScoreboard() {
+      const container = document.getElementById('scoreboard');
+      container.innerHTML = this.players.map((player, index) => {
+        const isActive = index === this.currentPlayerIndex;
+        const accuracy = player.questionsAnswered > 0 
+          ? Math.round((player.correctAnswers / player.questionsAnswered) * 100) 
+          : 0;
+        
+        return `
+          <div class="player-card ${isActive ? 'active' : ''}" style="border-color: ${player.color};">
+            <div class="name" style="color: ${player.color};">${player.name}</div>
+            <div class="score">${player.score}</div>
+            <div class="details">
+              ${player.questionsAnswered} / ${QUESTIONS_PER_PLAYER} otázek<br>
+              ${accuracy}% úspěšnost
+            </div>
+            ${isActive ? `
+              <div class="timer-display" id="timer">${this.timeRemaining}</div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    },
+    
+    // ===== TIMER =====
+    startTimer() {
+      this.stopTimer();
+      
+      this.timerInterval = setInterval(() => {
+        this.timeRemaining--;
+        
+        const timerEl = document.getElementById('timer');
+        if (timerEl) {
+          timerEl.textContent = this.timeRemaining;
+          
+          if (this.timeRemaining <= 10) {
+            timerEl.classList.add('warning');
+          } else {
+            timerEl.classList.remove('warning');
+          }
+        }
+        
+        if (this.timeRemaining <= 0) {
+          this.stopTimer();
+          if (!this.isAnswered) {
+            this.timeoutAnswer();
+          }
+        }
+      }, 1000);
+    },
+    
+    stopTimer() {
+      if (this.timerInterval) {
+        clearInterval(this.timerInterval);
+        this.timerInterval = null;
+      }
+    },
+    
+    timeoutAnswer() {
+      this.isAnswered = true;
+      this.setChoicesEnabled(false);
+      
+      const currentPlayer = this.players[this.currentPlayerIndex];
+      currentPlayer.questionsAnswered++;
+      
+      this.showMessage('gameMessage', 
+        `⏱️ Čas vypršel! Správná odpověď: ${this.currentQuestion.answerName}`, 'bad');
+      
+      this.renderScoreboard();
+      
+      setTimeout(() => this.nextTurn(), 2500);
+    },
+    
+    // ===== QUESTIONS =====
+    buildQuestion() {
+      const answer = this.countries[Math.floor(Math.random() * this.countries.length)];
+      const otherCountries = this.countries.filter(c => c.code !== answer.code);
+      
+      const shuffled = this.shuffle([...otherCountries]);
+      const options = shuffled.slice(0, CHOICE_COUNT - 1).map(c => ({ 
+        code: c.code, 
+        name: c.name 
+      }));
+      
+      options.push({ code: answer.code, name: answer.name });
+      
+      this.currentQuestion = {
+        answerCode: answer.code,
+        answerName: answer.name,
+        answerFlag: answer.flagPng,
+        options: this.shuffle(options)
+      };
+
+      document.getElementById('flagImg').src = this.currentQuestion.answerFlag;
+      document.getElementById('flagImg').alt = `Vlajka: ${this.currentQuestion.answerName}`;
+
+      this.renderChoices();
+    },
+    
+    renderChoices() {
+      const container = document.getElementById('choices');
+      container.innerHTML = this.currentQuestion.options.map((opt, index) => `
+        <button 
+          class="choice" 
+          data-code="${opt.code}"
+          onclick="app.answerQuestion('${opt.code}')"
+        >
+          ${opt.name}
+        </button>
+      `).join('');
+    },
+    
+    answerQuestion(chosenCode) {
+      if (this.isAnswered) return;
+      
+      this.isAnswered = true;
+      this.stopTimer();
+      this.setChoicesEnabled(false);
+      
+      const currentPlayer = this.players[this.currentPlayerIndex];
+      currentPlayer.questionsAnswered++;
+      
+      const isCorrect = chosenCode === this.currentQuestion.answerCode;
+      
+      // Visual feedback
+      const buttons = document.querySelectorAll('#choices button');
+      buttons.forEach(btn => {
+        if (btn.dataset.code === this.currentQuestion.answerCode) {
+          btn.classList.add('correct');
+        }
+        if (btn.dataset.code === chosenCode && !isCorrect) {
+          btn.classList.add('incorrect');
+        }
+      });
+
+      if (isCorrect) {
+        currentPlayer.score++;
+        currentPlayer.correctAnswers++;
+        this.showMessage('gameMessage', `✅ Správně! To je ${this.currentQuestion.answerName}.`, 'ok');
+      } else {
+        const chosenName = this.currentQuestion.options.find(o => o.code === chosenCode)?.name || '…';
+        this.showMessage('gameMessage', 
+          `❌ Špatně. Vybral(a) jsi „${chosenName}", správně je „${this.currentQuestion.answerName}".`, 'bad');
+      }
+
+      this.renderScoreboard();
+      
+      setTimeout(() => this.nextTurn(), 2500);
+    },
+    
+    // ===== RESULTS =====
+    endGame() {
+      this.gameState = 'results';
+      this.showScreen('resultsScreen');
+      
+      // Sort players by score
+      const sortedPlayers = [...this.players].sort((a, b) => b.score - a.score);
+      
+      const medals = ['🥇', '🥈', '🥉'];
+      const tbody = document.getElementById('resultsTableBody');
+      
+      tbody.innerHTML = sortedPlayers.map((player, index) => {
+        const accuracy = player.questionsAnswered > 0 
+          ? Math.round((player.correctAnswers / player.questionsAnswered) * 100) 
+          : 0;
+        
+        return `
+          <tr>
+            <td>
+              <span class="medal">${medals[index] || (index + 1) + '.'}</span>
+            </td>
+            <td style="color: ${player.color}; font-weight: 600;">${player.name}</td>
+            <td><strong>${player.score}</strong> / ${QUESTIONS_PER_PLAYER}</td>
+            <td>${accuracy}%</td>
+          </tr>
+        `;
+      }).join('');
+    },
+    
+    newGame() {
+      this.startGame();
+    },
+    
+    backToSetup() {
+      this.gameState = 'setup';
+      this.showScreen('setupScreen');
+      this.stopTimer();
+    },
+    
+    // ===== UI HELPERS =====
+    showScreen(screenId) {
+      document.querySelectorAll('.setup-screen, .game-screen, .results-screen')
+        .forEach(screen => screen.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+    },
+    
+    showMessage(elementId, text, kind) {
+      const el = document.getElementById(elementId);
+      el.style.display = 'block';
+      el.textContent = text;
+      el.classList.remove('ok', 'bad');
+      if (kind) el.classList.add(kind);
+    },
+    
+    hideMessage(elementId) {
+      const el = document.getElementById(elementId);
+      el.style.display = 'none';
+      el.textContent = '';
+      el.classList.remove('ok', 'bad');
+    },
+    
+    setChoicesEnabled(enabled) {
+      document.querySelectorAll('#choices button')
+        .forEach(btn => btn.disabled = !enabled);
+    },
+    
+    // ===== UTILS =====
+    shuffle(arr) {
+      const shuffled = [...arr];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    }
+  };
+  
+  // Make app globally accessible
+  window.app = app;
+  
+  // Start the app
+  app.init();
+})();
+</script>
+</body>
+</html>
