@@ -2,24 +2,37 @@
 <html lang="cs">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Souboj vlajek</title>
+
+  <!-- PWA manifest (inline as data URI pro single-file) -->
+  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Souboj%20vlajek%22%2C%22short_name%22%3A%22Vlajky%22%2C%22description%22%3A%22Kviz%20pro%20h%C3%A1d%C3%A1n%C3%AD%20vlajek%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f0f2f8%22%2C%22theme_color%22%3A%22%23667eea%22%2C%22orientation%22%3A%22portrait%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%253D'http%253A%252F%252Fwww.w3.org%252F2000%252Fsvg'%2520viewBox%253D'0%25200%2520512%2520512'%253E%253Crect%2520width%253D'512'%2520height%253D'512'%2520rx%253D'100'%2520fill%253D'%2523667eea'%252F%253E%253Ctext%2520x%253D'50%2525'%2520y%253D'55%2525'%2520font-size%253D'300'%2520text-anchor%253D'middle'%2520dominant-baseline%253D'middle'%253E%25F0%259F%258C%258D%253C%252Ftext%253E%253C%252Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D" />
+
+  <!-- iOS PWA meta -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Vlajky" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#667eea" />
+
+  <!-- iOS touch icon (inline SVG jako data URI) -->
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%23667eea'/><text x='50%25' y='55%25' font-size='300' text-anchor='middle' dominant-baseline='middle'>🌍</text></svg>" />
   <style>
     :root { 
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      --bg-dark: #0b1020;
-      --bg-card: #121a33;
-      --bg-input: #0f1730;
-      --bg-button: #1b2a57;
-      --border-subtle: rgba(255,255,255,.08);
-      --border-medium: rgba(255,255,255,.14);
-      --text-primary: #e8eefc;
-      --success: rgba(46, 204, 113, .5);
-      --success-bg: rgba(46, 204, 113, .10);
-      --error: rgba(231, 76, 60, .5);
-      --error-bg: rgba(231, 76, 60, .10);
-      --warning: rgba(241, 196, 15, .5);
-      --warning-bg: rgba(241, 196, 15, .10);
+      --bg-dark: #f0f2f8;
+      --bg-card: #ffffff;
+      --bg-input: #eef0f7;
+      --bg-button: #dde1f0;
+      --border-subtle: rgba(0,0,50,.1);
+      --border-medium: rgba(0,0,50,.16);
+      --text-primary: #1a1f3c;
+      --success: rgba(39, 174, 96, .6);
+      --success-bg: rgba(39, 174, 96, .12);
+      --error: rgba(192, 57, 43, .6);
+      --error-bg: rgba(192, 57, 43, .12);
+      --warning: rgba(180, 140, 0, .6);
+      --warning-bg: rgba(180, 140, 0, .12);
       --player1: #3498db;
       --player2: #e74c3c;
       --player3: #2ecc71;
@@ -33,12 +46,17 @@
       background: var(--bg-dark); 
       color: var(--text-primary);
       line-height: 1.5;
+      /* iOS safe area pro notch a home bar */
+      padding-bottom: env(safe-area-inset-bottom);
     }
     
     .wrap { 
       max-width: 1000px; 
       margin: 0 auto; 
       padding: 24px; 
+      padding-top: max(24px, env(safe-area-inset-top));
+      padding-left: max(24px, env(safe-area-inset-left));
+      padding-right: max(24px, env(safe-area-inset-right));
     }
     
     .card { 
@@ -46,7 +64,7 @@
       border: 1px solid var(--border-subtle); 
       border-radius: 16px; 
       padding: 20px; 
-      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      box-shadow: 0 4px 16px rgba(0,0,80,.10);
       margin-bottom: 20px;
     }
     
@@ -96,14 +114,14 @@
     
     .player-input-row input:focus {
       outline: none;
-      border-color: rgba(255,255,255,.4);
+      border-color: rgba(0,0,0,.4);
     }
     
     .player-color-badge {
       width: 24px;
       height: 24px;
       border-radius: 50%;
-      border: 2px solid rgba(255,255,255,.3);
+      border: 2px solid rgba(0,0,0,.2);
     }
     
     .btn-remove {
@@ -245,8 +263,8 @@
     }
     
     .player-card.active {
-      background: rgba(255, 255, 255, 0.06);
-      box-shadow: 0 0 20px rgba(255,255,255,.15);
+      background: rgba(0, 0, 80, 0.06);
+      box-shadow: 0 0 20px rgba(0,0,80,.12);
     }
     
     .player-card .name {
@@ -271,7 +289,7 @@
       font-weight: 700;
       margin-top: 10px;
       padding: 8px;
-      background: rgba(255,255,255,.08);
+      background: rgba(0,0,80,.08);
       border-radius: 8px;
     }
     
@@ -885,6 +903,60 @@
   // Start the app
   app.init();
 })();
+</script>
+
+<script>
+// ===== SERVICE WORKER (PWA offline podpora) =====
+if ('serviceWorker' in navigator) {
+  // Inline service worker jako blob
+  const swCode = `
+    const CACHE = 'souboj-vlajek-v1';
+    const FLAGCDN = 'https://flagcdn.com';
+
+    self.addEventListener('install', e => {
+      self.skipWaiting();
+    });
+
+    self.addEventListener('activate', e => {
+      e.waitUntil(
+        caches.keys().then(keys =>
+          Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+        )
+      );
+      self.clients.claim();
+    });
+
+    self.addEventListener('fetch', e => {
+      const url = e.request.url;
+      // Cache vlajky z flagcdn.com
+      if (url.startsWith(FLAGCDN)) {
+        e.respondWith(
+          caches.open(CACHE).then(cache =>
+            cache.match(e.request).then(cached => {
+              if (cached) return cached;
+              return fetch(e.request).then(res => {
+                cache.put(e.request, res.clone());
+                return res;
+              }).catch(() => cached);
+            })
+          )
+        );
+        return;
+      }
+      // Pro ostatní requesty — network first, pak cache
+      e.respondWith(
+        fetch(e.request).catch(() => caches.match(e.request))
+      );
+    });
+  `;
+
+  const blob = new Blob([swCode], { type: 'application/javascript' });
+  const swUrl = URL.createObjectURL(blob);
+
+  navigator.serviceWorker.register(swUrl, { scope: '/' })
+    .then(reg => console.log('SW registrován:', reg.scope))
+    .catch(err => console.warn('SW chyba:', err));
+}
 </script>
 </body>
 </html>
