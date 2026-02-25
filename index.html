@@ -18,395 +18,563 @@
   <!-- iOS touch icon (inline SVG jako data URI) -->
   <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%23667eea'/><text x='50%25' y='55%25' font-size='300' text-anchor='middle' dominant-baseline='middle'>🌍</text></svg>" />
   <style>
-    :root { 
+    :root {
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       --bg-dark: #f0f2f8;
       --bg-card: #ffffff;
       --bg-input: #eef0f7;
       --bg-button: #dde1f0;
-      --border-subtle: rgba(0,0,50,.1);
-      --border-medium: rgba(0,0,50,.16);
+      --border-subtle: rgba(0,0,50,.08);
+      --border-medium: rgba(0,0,50,.14);
       --text-primary: #1a1f3c;
-      --success: rgba(39, 174, 96, .6);
-      --success-bg: rgba(39, 174, 96, .12);
-      --error: rgba(192, 57, 43, .6);
-      --error-bg: rgba(192, 57, 43, .12);
-      --warning: rgba(180, 140, 0, .6);
-      --warning-bg: rgba(180, 140, 0, .12);
+      --text-secondary: #5a6078;
+      --accent: #667eea;
+      --accent-light: rgba(102,126,234,.12);
+      --success: rgba(39, 174, 96, .7);
+      --success-bg: rgba(39, 174, 96, .1);
+      --error: rgba(192, 57, 43, .7);
+      --error-bg: rgba(192, 57, 43, .1);
+      --warning: rgba(200, 155, 0, .7);
+      --warning-bg: rgba(200, 155, 0, .1);
       --player1: #3498db;
       --player2: #e74c3c;
       --player3: #2ecc71;
       --player4: #f39c12;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
     }
-    
-    * { box-sizing: border-box; }
-    
-    body { 
-      margin: 0; 
-      background: var(--bg-dark); 
+
+    * { box-sizing: border-box; margin: 0; }
+
+    body {
+      margin: 0;
+      background: var(--bg-dark);
       color: var(--text-primary);
       line-height: 1.5;
-      /* iOS safe area pro notch a home bar */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
       padding-bottom: env(safe-area-inset-bottom);
+      overflow-x: hidden;
     }
-    
-    .wrap { 
-      max-width: 1000px; 
-      margin: 0 auto; 
-      padding: 24px; 
-      padding-top: max(24px, env(safe-area-inset-top));
-      padding-left: max(24px, env(safe-area-inset-left));
-      padding-right: max(24px, env(safe-area-inset-right));
+
+    .wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 12px;
+      padding-top: max(12px, env(safe-area-inset-top));
+      padding-left: max(12px, env(safe-area-inset-left));
+      padding-right: max(12px, env(safe-area-inset-right));
     }
-    
-    .card { 
-      background: var(--bg-card); 
-      border: 1px solid var(--border-subtle); 
-      border-radius: 16px; 
-      padding: 20px; 
-      box-shadow: 0 4px 16px rgba(0,0,80,.10);
-      margin-bottom: 20px;
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,80,.06);
+      margin-bottom: 16px;
     }
-    
-    h1 { 
-      margin: 0 0 10px; 
-      font-size: 28px; 
-      font-weight: 700;
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      font-weight: 800;
       text-align: center;
+      letter-spacing: -0.02em;
     }
-    
+
     h2 {
-      margin: 0 0 15px;
-      font-size: 20px;
-      font-weight: 600;
+      margin: 0 0 12px;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
     }
-    
+
     .setup-screen, .game-screen, .results-screen {
       display: none;
     }
-    
+
     .setup-screen.active, .game-screen.active, .results-screen.active {
       display: block;
     }
-    
+
     .player-setup {
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      margin-bottom: 16px;
+      gap: 10px;
+      margin-bottom: 14px;
     }
-    
+
     .player-input-row {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
     }
-    
+
     .player-input-row input {
       flex: 1;
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid var(--border-medium);
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--border-medium);
       background: var(--bg-input);
       color: var(--text-primary);
       font-size: 16px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      /* Prevent iOS zoom on focus */
+      font-size: 16px;
     }
-    
+
     .player-input-row input:focus {
       outline: none;
-      border-color: rgba(0,0,0,.4);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-light);
     }
-    
+
     .player-color-badge {
-      width: 24px;
-      height: 24px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
-      border: 2px solid rgba(0,0,0,.2);
+      border: 2.5px solid rgba(255,255,255,.8);
+      box-shadow: 0 1px 4px rgba(0,0,0,.15);
+      flex-shrink: 0;
     }
-    
+
     .btn-remove {
-      padding: 8px 12px;
-      border-radius: 8px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
       border: 1px solid var(--error);
       background: var(--error-bg);
       color: var(--text-primary);
       cursor: pointer;
       font-size: 14px;
+      min-width: 44px;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    
-    button { 
-      padding: 14px 20px; 
-      border-radius: 12px; 
-      border: 1px solid var(--border-medium); 
-      background: var(--bg-button); 
-      color: var(--text-primary); 
-      cursor: pointer; 
+
+    button {
+      padding: 14px 20px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-medium);
+      background: var(--bg-button);
+      color: var(--text-primary);
+      cursor: pointer;
       font-weight: 600;
       font-size: 15px;
       transition: filter 0.15s ease, transform 0.1s ease;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      min-height: 44px;
     }
-    
-    button:hover:not(:disabled) { 
-      filter: brightness(1.15);
+
+    button:hover:not(:disabled) {
+      filter: brightness(1.08);
     }
-    
+
     button:active:not(:disabled) {
-      transform: scale(0.98);
+      transform: scale(0.97);
     }
-    
-    button:disabled { 
-      opacity: .55; 
-      cursor: not-allowed; 
+
+    button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
     }
-    
+
     button.primary {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
       border: none;
       font-size: 16px;
       padding: 16px 24px;
+      box-shadow: 0 4px 14px rgba(102,126,234,.3);
     }
-    
+
+    button.primary:active:not(:disabled) {
+      box-shadow: 0 2px 6px rgba(102,126,234,.2);
+    }
+
     button.secondary {
       background: var(--bg-input);
     }
-    
-    .current-turn {
+
+    .current-turn, .turn-info, .timer, .question-counter {
       display: none;
     }
-    
-    .turn-info {
-      display: none;
+
+    .row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
     }
-    
-    .timer {
-      display: none;
+
+    .flagBox {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: var(--bg-input);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      min-height: 180px;
     }
-    
-    .question-counter {
-      display: none;
-    }
-    
-    .row { 
-      display: flex; 
-      gap: 16px; 
-      flex-wrap: wrap; 
-      align-items: center; 
-    }
-    
-    .flagBox { 
-      flex: 1 1 360px; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      padding: 24px; 
-      background: var(--bg-input); 
-      border-radius: 14px; 
-      border: 1px solid var(--border-subtle); 
-      min-height: 250px;
-    }
-    
-    img.flag { 
-      width: min(420px, 100%); 
-      height: auto; 
-      border-radius: 10px; 
+
+    img.flag {
+      width: min(380px, 100%);
+      height: auto;
+      border-radius: var(--radius-sm);
       background: #fff;
-      box-shadow: 0 4px 12px rgba(0,0,0,.3);
+      box-shadow: 0 3px 10px rgba(0,0,0,.2);
     }
-    
-    .choices { 
-      display: grid; 
-      grid-template-columns: 1fr; 
-      gap: 12px; 
-      margin-top: 20px; 
+
+    .choices {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 14px;
     }
-    
-    @media (min-width: 700px) { 
-      .choices { 
-        grid-template-columns: 1fr 1fr; 
-      } 
-    }
-    
-    .choice { 
+
+    .choice {
       text-align: left;
       position: relative;
-      font-size: 16px;
-      padding: 16px 20px;
+      font-size: 15px;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      min-height: 48px;
+      line-height: 1.4;
     }
-    
+
     .choice.correct {
       background: var(--success-bg);
       border-color: var(--success);
     }
-    
+
     .choice.incorrect {
       background: var(--error-bg);
       border-color: var(--error);
     }
-    
+
     .scoreboard {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
     }
-    
+
     .player-card {
-      flex: 1;
-      min-width: 200px;
-      padding: 16px;
-      background: var(--bg-input);
-      border-radius: 12px;
+      padding: 10px;
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
       border: 2px solid;
       text-align: center;
-      transition: all 0.3s ease;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 1px 4px rgba(0,0,0,.04);
     }
-    
+
     .player-card.active {
-      background: rgba(0, 0, 80, 0.06);
-      box-shadow: 0 0 20px rgba(0,0,80,.12);
+      background: var(--accent-light);
+      box-shadow: 0 2px 16px rgba(102,126,234,.15);
     }
-    
+
     .player-card .name {
-      font-size: 18px;
+      font-size: 14px;
       font-weight: 700;
-      margin-bottom: 8px;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    
+
     .player-card .score {
-      font-size: 32px;
-      font-weight: 700;
-      margin: 8px 0;
+      font-size: 26px;
+      font-weight: 800;
+      margin: 2px 0;
+      letter-spacing: -0.02em;
     }
-    
+
     .player-card .details {
-      font-size: 13px;
-      opacity: .8;
+      font-size: 11px;
+      color: var(--text-secondary);
+      line-height: 1.4;
     }
-    
+
     .player-card .timer-display {
-      font-size: 28px;
+      font-size: 22px;
       font-weight: 700;
-      margin-top: 10px;
-      padding: 8px;
-      background: rgba(0,0,80,.08);
-      border-radius: 8px;
+      margin-top: 6px;
+      padding: 4px 8px;
+      background: rgba(0,0,80,.06);
+      border-radius: var(--radius-sm);
+      font-variant-numeric: tabular-nums;
     }
-    
+
     .player-card .timer-display.warning {
       background: var(--warning-bg);
       border: 2px solid var(--warning);
-      animation: pulse 1s ease-in-out infinite;
+      animation: pulse 0.8s ease-in-out infinite;
     }
-    
-    .results-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 20px 0;
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
     }
-    
-    .results-table th,
-    .results-table td {
+
+    .results-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 16px 0;
+    }
+
+    .result-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
       padding: 12px;
-      text-align: left;
-      border-bottom: 1px solid var(--border-subtle);
-    }
-    
-    .results-table th {
       background: var(--bg-input);
-      font-weight: 600;
+      border-radius: var(--radius-md);
+      border-left: 4px solid;
     }
-    
-    .results-table tr:first-child td {
-      font-size: 20px;
+
+    .result-item:first-child {
+      background: var(--accent-light);
+      border-left-color: var(--accent);
+    }
+
+    .result-rank {
+      font-size: 22px;
+      flex-shrink: 0;
+      width: 36px;
+      text-align: center;
+    }
+
+    .result-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .result-name {
       font-weight: 700;
+      font-size: 15px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    
-    .medal {
-      font-size: 24px;
-      margin-right: 8px;
+
+    .result-stats {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
     }
-    
+
+    .result-score {
+      font-size: 22px;
+      font-weight: 800;
+      flex-shrink: 0;
+      letter-spacing: -0.02em;
+    }
+
+    .result-item:first-child .result-score {
+      font-size: 26px;
+    }
+
     .center {
       text-align: center;
     }
-    
-    .msg { 
-      margin-top: 16px; 
-      padding: 12px 16px; 
-      border-radius: 12px; 
-      border: 1px solid var(--border-medium); 
+
+    .msg {
+      margin-top: 12px;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-medium);
       background: rgba(255,255,255,.06);
       animation: slideIn 0.2s ease;
       text-align: center;
+      font-size: 14px;
     }
-    
+
     @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateY(-5px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    
-    .msg.ok { 
-      border-color: var(--success); 
-      background: var(--success-bg); 
+
+    .msg.ok {
+      border-color: var(--success);
+      background: var(--success-bg);
     }
-    
-    .msg.bad { 
-      border-color: var(--error); 
-      background: var(--error-bg); 
+
+    .msg.bad {
+      border-color: var(--error);
+      background: var(--error-bg);
     }
-    
-    .small { 
-      opacity: .85; 
-      font-size: 13px; 
-      line-height: 1.35; 
+
+    .small {
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1.35;
     }
-    
+
     .loader {
       display: inline-block;
       width: 14px;
       height: 14px;
-      border: 2px solid rgba(255,255,255,.2);
-      border-top-color: var(--text-primary);
+      border: 2px solid rgba(0,0,50,.1);
+      border-top-color: var(--accent);
       border-radius: 50%;
       animation: spin 0.6s linear infinite;
       vertical-align: middle;
       margin-right: 8px;
     }
-    
+
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
-    
+
     .btn-group {
       display: flex;
-      gap: 12px;
+      gap: 10px;
       justify-content: center;
-      margin-top: 20px;
+      margin-top: 16px;
       flex-wrap: wrap;
     }
-    
+
+    .btn-group button {
+      flex: 1;
+      min-width: 0;
+    }
+
     .info-box {
-      background: var(--bg-input);
-      border: 1px solid var(--border-subtle);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 20px;
+      background: var(--accent-light);
+      border: 1px solid rgba(102,126,234,.2);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      margin-bottom: 16px;
     }
-    
+
+    .info-box strong {
+      color: var(--accent);
+    }
+
     .info-box ul {
-      margin: 10px 0;
-      padding-left: 24px;
+      margin: 8px 0 0;
+      padding-left: 20px;
     }
-    
+
     .info-box li {
-      margin: 6px 0;
+      margin: 4px 0;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ===== MOBILE-FIRST RESPONSIVE ===== */
+
+    /* Very small phones (320px) */
+    @media (max-width: 359px) {
+      .wrap { padding: 8px; }
+      .card { padding: 12px; border-radius: var(--radius-md); }
+      h1 { font-size: 20px; }
+      h2 { font-size: 16px; }
+      .flagBox { min-height: 140px; padding: 12px; }
+      .player-card .score { font-size: 22px; }
+      .player-card .name { font-size: 13px; }
+      .scoreboard { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+      .choice { padding: 12px; font-size: 14px; }
+      .btn-group { gap: 8px; }
+      .btn-group button { font-size: 14px; padding: 12px 16px; }
+      .result-item { padding: 10px; gap: 8px; }
+      .result-rank { font-size: 18px; width: 30px; }
+      .result-score { font-size: 18px; }
+      .result-item:first-child .result-score { font-size: 22px; }
+    }
+
+    /* Small phones (360-479px) */
+    @media (min-width: 360px) and (max-width: 479px) {
+      .scoreboard { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* Medium phones / small tablets (480-699px) */
+    @media (min-width: 480px) {
+      .wrap { padding: 16px; }
+      .card { padding: 20px; }
+      h1 { font-size: 24px; }
+      .flagBox { min-height: 200px; }
+      .scoreboard { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+      .player-card { padding: 12px; }
+      .player-card .name { font-size: 15px; }
+      .player-card .score { font-size: 28px; }
+    }
+
+    /* Tablets and desktop (700px+) */
+    @media (min-width: 700px) {
+      .wrap { padding: 24px; padding-top: max(24px, env(safe-area-inset-top)); }
+      .card { padding: 24px; border-radius: var(--radius-xl); }
+      h1 { font-size: 28px; margin-bottom: 12px; }
+      h2 { font-size: 20px; }
+      .choices { grid-template-columns: 1fr 1fr; gap: 12px; }
+      .choice { font-size: 16px; padding: 16px 20px; }
+      .flagBox { min-height: 280px; padding: 24px; }
+      img.flag { width: min(420px, 100%); }
+      .scoreboard { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+      .player-card { padding: 16px; }
+      .player-card .name { font-size: 16px; }
+      .player-card .score { font-size: 32px; }
+      .player-card .details { font-size: 13px; }
+      .player-card .timer-display { font-size: 28px; }
+      .result-item { padding: 14px 16px; }
+      .result-name { font-size: 16px; }
+      .result-stats { font-size: 13px; }
+      .msg { font-size: 15px; }
+      .info-box li { font-size: 15px; }
+      .btn-group button { flex: 0 1 auto; }
+    }
+
+    /* Large screens (900px+) */
+    @media (min-width: 900px) {
+      .scoreboard { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+    }
+
+    /* Landscape phones - constrain height */
+    @media (max-height: 500px) and (orientation: landscape) {
+      .flagBox { min-height: 120px; padding: 8px; }
+      img.flag { max-height: 150px; width: auto; }
+      .player-card .score { font-size: 20px; }
+      .player-card .timer-display { font-size: 18px; margin-top: 4px; }
+      h1 { font-size: 18px; margin-bottom: 4px; }
+    }
+
+    /* Reduce motion for users who prefer it */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-dark: #0f1225;
+        --bg-card: #1a1e36;
+        --bg-input: #232847;
+        --bg-button: #2a3058;
+        --border-subtle: rgba(200,210,255,.08);
+        --border-medium: rgba(200,210,255,.14);
+        --text-primary: #e8ecfa;
+        --text-secondary: #9aa0bc;
+        --accent-light: rgba(102,126,234,.18);
+      }
+
+      .player-color-badge {
+        border-color: rgba(0,0,0,.3);
+      }
+
+      img.flag {
+        box-shadow: 0 3px 10px rgba(0,0,0,.4);
+      }
     }
   </style>
 </head>
@@ -451,7 +619,7 @@
       
       <div class="card">
         <div class="flagBox">
-          <img id="flagImg" class="flag" alt="Vlajka" />
+          <img id="flagImg" class="flag" alt="Vlajka" loading="eager" decoding="async" />
         </div>
         
         <div class="choices" id="choices"></div>
@@ -464,21 +632,11 @@
     <div class="results-screen" id="resultsScreen">
       <div class="card">
         <h2 class="center">🎉 Výsledky hry</h2>
-        
-        <table class="results-table">
-          <thead>
-            <tr>
-              <th>Pořadí</th>
-              <th>Hráč</th>
-              <th>Skóre</th>
-              <th>Úspěšnost</th>
-            </tr>
-          </thead>
-          <tbody id="resultsTableBody">
-            <!-- Results will be added here -->
-          </tbody>
-        </table>
-        
+
+        <div class="results-list" id="resultsList">
+          <!-- Results will be added here -->
+        </div>
+
         <div class="btn-group">
           <button class="primary" onclick="app.newGame()">🔄 Nová hra</button>
           <button class="secondary" onclick="app.backToSetup()">⚙️ Změnit hráče</button>
@@ -747,15 +905,15 @@
     buildQuestion() {
       const answer = this.countries[Math.floor(Math.random() * this.countries.length)];
       const otherCountries = this.countries.filter(c => c.code !== answer.code);
-      
+
       const shuffled = this.shuffle([...otherCountries]);
-      const options = shuffled.slice(0, CHOICE_COUNT - 1).map(c => ({ 
-        code: c.code, 
-        name: c.name 
+      const options = shuffled.slice(0, CHOICE_COUNT - 1).map(c => ({
+        code: c.code,
+        name: c.name
       }));
-      
+
       options.push({ code: answer.code, name: answer.name });
-      
+
       this.currentQuestion = {
         answerCode: answer.code,
         answerName: answer.name,
@@ -763,8 +921,16 @@
         options: this.shuffle(options)
       };
 
-      document.getElementById('flagImg').src = this.currentQuestion.answerFlag;
-      document.getElementById('flagImg').alt = `Vlajka: ${this.currentQuestion.answerName}`;
+      const flagImg = document.getElementById('flagImg');
+      flagImg.src = this.currentQuestion.answerFlag;
+      flagImg.alt = `Vlajka: ${this.currentQuestion.answerName}`;
+
+      // Preload next flag for smoother transitions
+      if (this.countries.length > 0) {
+        const nextFlag = this.countries[Math.floor(Math.random() * this.countries.length)];
+        const preload = new Image();
+        preload.src = nextFlag.flagPng;
+      }
 
       this.renderChoices();
     },
@@ -824,27 +990,25 @@
     endGame() {
       this.gameState = 'results';
       this.showScreen('resultsScreen');
-      
-      // Sort players by score
+
       const sortedPlayers = [...this.players].sort((a, b) => b.score - a.score);
-      
       const medals = ['🥇', '🥈', '🥉'];
-      const tbody = document.getElementById('resultsTableBody');
-      
-      tbody.innerHTML = sortedPlayers.map((player, index) => {
-        const accuracy = player.questionsAnswered > 0 
-          ? Math.round((player.correctAnswers / player.questionsAnswered) * 100) 
+      const container = document.getElementById('resultsList');
+
+      container.innerHTML = sortedPlayers.map((player, index) => {
+        const accuracy = player.questionsAnswered > 0
+          ? Math.round((player.correctAnswers / player.questionsAnswered) * 100)
           : 0;
-        
+
         return `
-          <tr>
-            <td>
-              <span class="medal">${medals[index] || (index + 1) + '.'}</span>
-            </td>
-            <td style="color: ${player.color}; font-weight: 600;">${player.name}</td>
-            <td><strong>${player.score}</strong> / ${QUESTIONS_PER_PLAYER}</td>
-            <td>${accuracy}%</td>
-          </tr>
+          <div class="result-item" style="border-left-color: ${player.color};">
+            <div class="result-rank">${medals[index] || (index + 1) + '.'}</div>
+            <div class="result-info">
+              <div class="result-name" style="color: ${player.color};">${player.name}</div>
+              <div class="result-stats">${accuracy}% úspěšnost · ${player.correctAnswers}/${player.questionsAnswered} správně</div>
+            </div>
+            <div class="result-score">${player.score}</div>
+          </div>
         `;
       }).join('');
     },
