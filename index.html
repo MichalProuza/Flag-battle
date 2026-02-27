@@ -978,7 +978,7 @@
       } else {
         const chosenName = this.currentQuestion.options.find(o => o.code === chosenCode)?.name || '…';
         this.showMessage('gameMessage', 
-          `❌ Špatně. Vybral(a) jsi „${chosenName}", správně je „${this.currentQuestion.answerName}".`, 'bad');
+          `❌ Špatně. Vybral(a) jsi „${chosenName}“, správně je „${this.currentQuestion.answerName}“.`, 'bad');
       }
 
       this.renderScoreboard();
